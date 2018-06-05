@@ -21,10 +21,14 @@
       if (el.type === 'tag') {
 
         if (el.name === 'figure') {
-          const caption = $(el).find('figcaption').text();
-          // last() because the first img is low res
-          const src = $('div > img').last().attr('data-src');
-          return `\n![${caption}](${src})`;
+          if($(el).hasClass('graf--iframe')) {
+            return processElement($(el).find('iframe').get(0));
+          } else {
+            const caption = $(el).find('figcaption').text();
+            // last() because the first img is low res
+            const src = $('div > img').last().attr('data-src');
+            return `\n![${caption}](${src})`;
+          }
         }
 
         // Can't use .map() because it mutates the element
