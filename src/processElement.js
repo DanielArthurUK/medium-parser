@@ -51,8 +51,9 @@ export const processElement = element => {
 
     // TODO Finish refactoring
 
-    if (el.name === 'h4') return `\n## ${processed}`;
-    if (el.name === 'h3') return `\n# ${processed}`;
+    if (el.name === 'h4') return `\n### ${processed}`;
+    if (el.name === 'h3') return `\n## ${processed}`;
+    if (el.name === 'h1') return `\n# ${processed}`;
     if (el.name === 'ul') {
       return `\n${processed}`;
     }
