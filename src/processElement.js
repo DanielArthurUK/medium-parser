@@ -7,12 +7,14 @@ const processElement = element => new Promise((resolve, reject) => {
 
   if (el.type === 'text') {
     const text = $(el).text();
-    const firstChar = text.substr(0, 1);
-    if (['*', '-'].indexOf(firstChar) > -1) {
-      resolve(`\\${text}`);
-    } else {
-      resolve(text);
-    }
+    const escaped = text.replace(/[#_*~><>/\\[\]!()`-]+/g, (symbol) => {
+      let output = '';
+      for (let i = 0; i < symbol.length; i += 1) {
+        output += `\\${symbol[i]}`;
+      }
+      return output;
+    }).replace(/(^\s+)|(\s+$)/g, '');
+    resolve(escaped);
   } else if (el.type === 'tag') {
 
     if (el.name === 'figure') {
@@ -38,9 +40,9 @@ const processElement = element => new Promise((resolve, reject) => {
         const processed = results.join('');
 
         if (el.name === 'em' || el.name === 'i') {
-          resolve(`*${processed}*`);
+          resolve(` *${processed}* `);
         } else if (el.name === 'strong' || el.name === 'b') {
-          resolve(`**${processed}**`);
+          resolve(` **${processed}** `);
         } else if (el.name === 'a') {
           const href = $(el).attr('href');
           resolve(`[${processed}](${href})`);

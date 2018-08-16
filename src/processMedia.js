@@ -9,7 +9,7 @@ const processMedia = url => new Promise((resolve, reject) => {
       const $ = cheerio.load(html);
       if ($('html').has('script[src^="https://gist.github.com/"]').length) { // Github Gist
         // Extract the Gist's ID:
-        const gistId = $('body > script').attr('src').replace(/^.*[\\\/]/, '').replace(/\.js$/, '');
+        const gistId = $('body > script').attr('src').replace(/^.*[\\/]/, '').replace(/\.js$/, '');
         processGist(gistId)
           .then((markdown) => { resolve(markdown); });
       } else {
