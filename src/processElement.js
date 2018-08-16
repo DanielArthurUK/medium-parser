@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+import processMedia from './processMedia';
 
 const processElement = element => new Promise((resolve, reject) => {
   const $ = cheerio.load(element);
@@ -15,11 +16,17 @@ const processElement = element => new Promise((resolve, reject) => {
   } else if (el.type === 'tag') {
 
     if (el.name === 'figure') {
-      const caption = $(el).find('figcaption').text();
-      // last() because the first img is low res
-      const img = $('div > img').last();
-      const src = img.attr('data-src') || img.attr('src');
-      resolve(`\n![${caption}](${src})`);
+      if ($(el).has('iframe').length) {
+        const url = `https://medium.com${$(el).find('iframe').attr('src')}`;
+        processMedia(url)
+          .then((markdown) => { resolve(markdown); });
+      } else {
+        const caption = $(el).find('figcaption').text();
+        // last() because the first img is low res
+        const img = $('div > img').last();
+        const src = img.attr('data-src') || img.attr('src');
+        resolve(`\n![${caption}](${src})`);
+      }
     } else {
       // Can't use .map() because it mutates the element
       const p = [];

@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
 import processElement from './processElement';
 
-const parseMedium = html => new Promise((resolve, reject) => {
+const parse = html => new Promise((resolve, reject) => {
   const $ = cheerio.load(html);
   const title = $('h1').first().text();
   const elements = $('.section-inner').contents().toArray().map(processElement);
@@ -16,4 +16,4 @@ const parseMedium = html => new Promise((resolve, reject) => {
   });
 });
 
-export default parseMedium;
+export default parse;
