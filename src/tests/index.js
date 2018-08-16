@@ -1,10 +1,11 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import test from 'tape';
+import fs from 'fs';
+import path from 'path';
 import parse from '../index';
 import processElement from '../processElement';
-import fs from 'fs'
-import path from 'path'
 
-test('processing of html tags', t => {
+test('processing of html tags', (t) => {
   let html;
   let actual;
   let expected;
@@ -83,7 +84,7 @@ test('processing of html tags', t => {
   t.end();
 });
 
-test('processing the html of an medium post', t => {
+test('processing the html of an medium post', (t) => {
   let actual;
   let expected;
 

@@ -1,6 +1,6 @@
-import * as  cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 
-export const processElement = element => new Promise((resolve, reject) => {
+const processElement = element => new Promise((resolve, reject) => {
   const $ = cheerio.load(element);
   const el = $(element).get(0);
 
@@ -27,7 +27,7 @@ export const processElement = element => new Promise((resolve, reject) => {
         p.push(processElement(e));
       });
 
-      Promise.all(p).then(results => {
+      Promise.all(p).then((results) => {
         const processed = results.join('');
 
         if (el.name === 'em' || el.name === 'i') {
@@ -65,11 +65,13 @@ export const processElement = element => new Promise((resolve, reject) => {
           console.log(`parse-medium: unprocessed tag <${el.name}>`);
           resolve(`\n${processed}`);
         }
-      }).catch(err => {
+      }).catch((err) => {
         reject(err);
-      })
+      });
     }
   } else {
     resolve(el);
   }
 });
+
+export default processElement;
