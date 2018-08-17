@@ -20,7 +20,8 @@
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-react": "^7.11.0",
     "nodemon": "^1.18.3",
-    "tape": "^4.9.1"
+    "tape": "^4.9.1",
+    "tape-promise": "^3.0.0"
   },
   "scripts": {
     "build": "babel src/ --out-dir lib/",

@@ -1,103 +1,112 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import test from 'tape';
+import test from 'tape-promise/tape';
 import fs from 'fs';
 import path from 'path';
 import parse from '../index';
 import processElement from '../processElement';
 
+
 test('processing of html tags', (t) => {
+
+  const buildProcessElementTest = (html, expected, message) => processElement(html)
+    .then((actual) => {
+      t.equal(actual, expected, message);
+    });
+
   let html;
-  let actual;
   let expected;
+  let message;
+
+  const tests = [];
 
   html = '<strong>Para<em>graph</em></strong>';
-  actual = processElement(html);
   expected = '**Para*graph***';
-  t.equal(actual, expected, 'should accept recursive tags');
+  message = 'should accept recursive tags';
+  tests.push(buildProcessElementTest(html, expected, message));
 
   html = '<blockquote>* Awesome</blockquote>';
-  actual = processElement(html);
   expected = '\n> \\* Awesome';
-  t.equal(actual, expected, 'should escape *');
+  message = 'should escape *';
+  tests.push(buildProcessElementTest(html, expected, message));
 
   html = '<blockquote>- Awesome</blockquote>';
-  actual = processElement(html);
   expected = '\n> \\- Awesome';
-  t.equal(actual, expected, 'should escape -');
+  message = 'should escape -';
+  tests.push(buildProcessElementTest(html, expected, message));
 
   // Tags
 
   html = '<p>Paragraph</p>';
-  actual = processElement(html);
   expected = '\n\nParagraph';
-  t.equal(actual, expected, 'should accept <p>');
+  message = 'should accept <p>';
+  tests.push(buildProcessElementTest(html, expected, message));
 
   html = '<em>graph</em>';
-  actual = processElement(html);
   expected = '*graph*';
-  t.equal(actual, expected, 'should accept <em>');
+  message = 'should accept <em>';
+  tests.push(buildProcessElementTest(html, expected, message));
 
   html = '<strong>graph</strong>';
-  actual = processElement(html);
   expected = '**graph**';
-  t.equal(actual, expected, 'should accept <strong>');
+  message = 'should accept <strong>';
+  tests.push(buildProcessElementTest(html, expected, message));
 
   html = '<a href="http://medium.com">Medium</a>';
-  actual = processElement(html);
   expected = '[Medium](http://medium.com)';
-  t.equal(actual, expected, 'should accept <a>');
+  message = 'should accept <a>';
+  tests.push(buildProcessElementTest(html, expected, message));
 
   html = '<blockquote>This is fun</blockquote>';
-  actual = processElement(html);
   expected = '\n> This is fun';
-  t.equal(actual, expected, 'should accept <blockquote>');
+  message = 'should accept <blockquote>';
+  tests.push(buildProcessElementTest(html, expected, message));
 
   html = '<h4>Subtitle</h4>';
-  actual = processElement(html);
-  expected = '\n## Subtitle';
-  t.equal(actual, expected, 'should accept <h4>');
+  expected = '\n### Subtitle';
+  message = 'should accept <h4>';
+  tests.push(buildProcessElementTest(html, expected, message));
 
   html = '<ul><li>Item 1</li><li>Item 2</li></ul>';
-  actual = processElement(html);
   expected = '\n\n- Item 1\n- Item 2';
-  t.equal(actual, expected, 'should accept <ul> and <li>');
+  message = 'should accept <ul> and <li>';
+  tests.push(buildProcessElementTest(html, expected, message));
 
   html = '<img src="http://google.com/doodle.jpg" alt="Doodle" />';
-  actual = processElement(html);
   expected = '![Doodle](http://google.com/doodle.jpg)';
-  t.equal(actual, expected, 'should accept <img>');
+  message = 'should accept <img>';
+  tests.push(buildProcessElementTest(html, expected, message));
 
   html = '<figure><div><img data-src="http://google.com/doodle.jpg" /><img data-src="http://google.com/secondDoodle.jpg" /></div><figcaption>Cool</figcaption></figure>';
-  actual = processElement(html);
   expected = '\n![Cool](http://google.com/secondDoodle.jpg)';
-  t.equal(actual, expected, 'should accept <figure> and get second img b/c first is low-res');
+  message = 'should accept <figure> and get second img b/c first is low-res';
+  tests.push(buildProcessElementTest(html, expected, message));
 
   html = `<pre>function add (a, b) {
       return a + b;
   }</pre>`;
-  actual = processElement(html);
   expected = `\n~~~\nfunction add (a, b) {
       return a + b;
   }\n~~~\n`;
-  t.equal(actual, expected, 'should accept <pre>');
+  message = 'should accept <pre>';
+  tests.push(buildProcessElementTest(html, expected, message));
 
-  t.end();
+  return Promise.all(tests);
 });
 
 test('processing the html of an medium post', (t) => {
-  let actual;
-  let expected;
-
   const html = fs.readFileSync(path.resolve(__dirname, '../../mocks/dan.html'), 'utf-8');
-  const parsed = parse(html);
+  return parse(html).then((post) => {
+    const expected = fs.readFileSync(path.resolve(__dirname, '../../mocks/dan.md'), 'utf-8');
+    t.equal(post.markdown, expected, 'should parse local article successfully');
+    t.equal(post.title, 'Presentational and Container Components', 'should parse for title');
+  });
+});
 
-  actual = parsed.markdown;
-  expected = fs.readFileSync(path.resolve(__dirname, '../../mocks/dan.md'), 'utf-8');
-  t.equal(actual, expected, 'should parse local article successfuly');
-
-  actual = parsed.title;
-  expected = 'Presentational and Container Components';
-  t.equal(actual, expected, 'should parse for title');
-
-  t.end();
+test('processing the html of a medium post with Gists', (t) => {
+  const html = fs.readFileSync(path.resolve(__dirname, '../../mocks/lavrton.html'), 'utf-8');
+  return parse(html).then((post) => {
+    const expected = fs.readFileSync(path.resolve(__dirname, '../../mocks/lavrton.md'), 'utf-8');
+    t.equal(post.markdown, expected, 'should parse local article with gists successfully');
+    t.equal(post.title, 'Tips to optimise rendering of a set of elements in React', 'should parse for title');
+  });
 });

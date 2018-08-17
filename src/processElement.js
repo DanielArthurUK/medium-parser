@@ -16,7 +16,6 @@ const processElement = element => new Promise((resolve, reject) => {
     });
     resolve(escaped);
   } else if (el.type === 'tag') {
-
     if (el.name === 'figure') {
       if ($(el).has('iframe').length) {
         const url = `https://medium.com${$(el).find('iframe').attr('src')}`;
@@ -29,6 +28,9 @@ const processElement = element => new Promise((resolve, reject) => {
         const src = img.attr('data-src') || img.attr('src');
         resolve(`\n![${caption}](${src})`);
       }
+    } else if (el.name === 'pre') {
+      // pre tags should not have their contents escaped
+      resolve(`\n~~~\n${$(el).html()}\n~~~\n`);
     } else {
       // Can't use .map() because it mutates the element
       const p = [];
@@ -51,7 +53,7 @@ const processElement = element => new Promise((resolve, reject) => {
           return '';
         });
 
-        // Add the removed whitespace to the outside of inline elements such as <em>, <strong> and <a>
+        // Add the removed whitespace to the outside of inline elements
         if (el.name === 'em' || el.name === 'i') {
           resolve(`${leadingWhitespace}*${processed}*${trailingWhitespace}`);
         } else if (el.name === 'strong' || el.name === 'b') {
@@ -68,7 +70,7 @@ const processElement = element => new Promise((resolve, reject) => {
         } else if (el.name === 'h1') {
           resolve(`\n# ${processed}`);
         } else if (el.name === 'ul') {
-          resolve(`\n${processed}`);
+          resolve(`\n\n${processed}`);
         } else if (el.name === 'li') {
           resolve(`\n- ${processed}`);
         } else if (el.name === 'p') {
@@ -81,8 +83,6 @@ const processElement = element => new Promise((resolve, reject) => {
           resolve(`\n${processed}`);
         } else if (['figure', 'div', 'figcaption'].indexOf(el.name) > -1) {
           resolve(`\n${processed}`);
-        } else if (el.name === 'pre') {
-          resolve(`\n~~~\n${processed}\n~~~\n`);
         } else {
           console.log(`parse-medium: unprocessed tag <${el.name}>`);
           resolve(`\n${processed}`);
