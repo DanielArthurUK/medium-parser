@@ -13,7 +13,7 @@ const processElement = element => new Promise((resolve, reject) => {
         output += `\\${symbol[i]}`;
       }
       return output;
-    }).replace(/(^\s+)|(\s+$)/g, '');
+    });
     resolve(escaped);
   } else if (el.type === 'tag') {
 
@@ -37,15 +37,28 @@ const processElement = element => new Promise((resolve, reject) => {
       });
 
       Promise.all(p).then((results) => {
-        const processed = results.join('');
+        let processed = results.join('');
 
+        // Remove the leading and trailing whitespace from the inside of a tag
+        let leadingWhitespace = '';
+        let trailingWhitespace = '';
+        processed = processed.replace(/^\s+/g, (whitespace) => {
+          leadingWhitespace = whitespace;
+          return '';
+        });
+        processed = processed.replace(/\s+$/g, (whitespace) => {
+          trailingWhitespace = whitespace;
+          return '';
+        });
+
+        // Add the removed whitespace to the outside of inline elements such as <em>, <strong> and <a>
         if (el.name === 'em' || el.name === 'i') {
-          resolve(` *${processed}* `);
+          resolve(`${leadingWhitespace}*${processed}*${trailingWhitespace}`);
         } else if (el.name === 'strong' || el.name === 'b') {
-          resolve(` **${processed}** `);
+          resolve(`${leadingWhitespace}**${processed}**${trailingWhitespace}`);
         } else if (el.name === 'a') {
           const href = $(el).attr('href');
-          resolve(`[${processed}](${href})`);
+          resolve(`${leadingWhitespace}[${processed}](${href})${trailingWhitespace}`);
         } else if (el.name === 'blockquote') {
           resolve(`\n> ${processed}`);
         } else if (el.name === 'h4') {
