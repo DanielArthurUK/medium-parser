@@ -1,10 +1,10 @@
 # medium-parser
 
-A simple parser for Medium (html) into Markdown.
+A parser for Medium articles (html) into Markdown.
 
 ## Example usage
 
-`npm install medium-parser`
+`npm install --save medium-parser`
 
 then
 
@@ -38,6 +38,11 @@ fetch('https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0')
   })
 
 ```
+
+## Features
+- Asynchronous API that works well alongside `fetch` to pull and parse a Medium article
+- Images, lists, and text formatting are all preserved
+- GitHub Gist code snippets get rendered as syntax-highlighted code snippets properly formatted in markdown.
 
 ## License
 
